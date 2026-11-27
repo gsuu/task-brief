@@ -62,7 +62,7 @@
   done: '…',            // 없으면 ''
   must: ['…'],          // 없으면 []
   mustnot: ['…'],
-  materials: ['…'],     // 피그마 주소나 파일 경로, 한 줄에 하나
+  materials: ['…'],     // 피그마 주소, 그리고 올린 파일마다 '첨부 파일: 이름'
   notes: ['…'],         // 확인 단계에서 정해진 내용
   skills: ['ui-component-builder'],
 }
@@ -100,7 +100,7 @@
 
 **Interfaces:**
 - Consumes: 없음
-- Produces: `PROMPT_VERSION: string`, `RULES: string[]`, `SKILL_INSTALL: string`, `PSD_NOTE: string`, `WRAP_UP: string` (`prompt-template.js`), `buildPrompt(task): string` (`build-prompt.js`)
+- Produces: `PROMPT_VERSION: string`, `RULES: string[]`, `SKILL_INSTALL: string`, `PSD_NOTE: string`, `FILE_NOTE: string`, `WRAP_UP: string` (`prompt-template.js`), `buildPrompt(task): string` (`build-prompt.js`)
 
 - [ ] **Step 1: `package.json` 작성**
 
@@ -124,7 +124,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildPrompt } from '../site/js/build-prompt.js';
-import { RULES, WRAP_UP, SKILL_INSTALL, PSD_NOTE } from '../site/js/prompt-template.js';
+import { RULES, WRAP_UP, SKILL_INSTALL, PSD_NOTE, FILE_NOTE } from '../site/js/prompt-template.js';
 
 const base = {
   id: '', goal: '이벤트 목록에 필터 추가', done: '',
@@ -165,6 +165,12 @@ test('모든 칸이 차면 정해진 순서로 들어간다', () => {
   }
 });
 
+test('올린 파일이 있으면 함께 전달된다는 안내가 붙는다', () => {
+  const out = buildPrompt({ ...base, materials: ['https://figma.com/x', '첨부 파일: main.psd'] });
+  assert.ok(out.includes(`- https://figma.com/x\n- 첨부 파일: main.psd\n${FILE_NOTE}\n${PSD_NOTE}`));
+  assert.ok(!buildPrompt({ ...base, materials: ['https://figma.com/x'] }).includes(FILE_NOTE));
+});
+
 test('PSD 자료가 있으면 읽는 방법 안내가 붙는다', () => {
   const withPsd = buildPrompt({ ...base, materials: ['design/main.PSD'] });
   assert.ok(withPsd.includes(`- design/main.PSD\n${PSD_NOTE}`));
@@ -194,6 +200,9 @@ export const RULES = [
 export const SKILL_INSTALL =
   '위 스킬이 설치돼 있지 않으면 그 스킬만 개인 영역에 내려받은 뒤 진행한다(npx skills add https://github.com/cttd/skills --skill <이름>). 프로젝트 폴더에는 설치하지 않는다. 설치에 실패하면 이유를 알리고 스킬 없이 진행한다.';
 
+export const FILE_NOTE =
+  '첨부 파일은 이 프롬프트와 함께 전달된다. 보이지 않으면 작업 전에 먼저 요청한다.';
+
 export const PSD_NOTE =
   'PSD는 연결된 도구가 있으면 그것으로 읽고, 없으면 직접 읽어 보고, 안 되면 PNG로 내보내 달라고 요청한다.';
 
@@ -206,7 +215,7 @@ export const WRAP_UP =
 `site/js/build-prompt.js`:
 
 ```js
-import { RULES, SKILL_INSTALL, PSD_NOTE, WRAP_UP } from './prompt-template.js';
+import { RULES, SKILL_INSTALL, PSD_NOTE, FILE_NOTE, WRAP_UP } from './prompt-template.js';
 
 function block(title, body) {
   return body === '' ? '' : `${title}\n${body}`;
@@ -218,9 +227,9 @@ function list(lines) {
 
 export function buildPrompt(task) {
   const hasPsd = task.materials.some((m) => /\.psd$/i.test(m));
-  const materials = task.materials.length
-    ? list(task.materials) + (hasPsd ? `\n${PSD_NOTE}` : '')
-    : '';
+  const hasFile = task.materials.some((m) => m.startsWith('첨부 파일: '));
+  const materialNotes = [hasFile ? FILE_NOTE : '', hasPsd ? PSD_NOTE : ''].filter(Boolean);
+  const materials = task.materials.length ? [list(task.materials), ...materialNotes].join('\n') : '';
   const skills = task.skills.length ? `${task.skills.join(', ')}\n${SKILL_INSTALL}` : '';
 
   return [
@@ -241,7 +250,7 @@ export function buildPrompt(task) {
 - [ ] **Step 6: 테스트가 통과하는지 확인**
 
 Run: `npm test`
-Expected: PASS — 4 tests
+Expected: PASS — 5 tests
 
 - [ ] **Step 7: 커밋**
 
@@ -417,7 +426,7 @@ export function applyAnswers(task, items, answers) {
 - [ ] **Step 4: 테스트가 통과하는지 확인**
 
 Run: `npm test`
-Expected: PASS — 11 tests (Task 1의 4개 포함)
+Expected: PASS — 12 tests (Task 1의 5개 포함)
 
 - [ ] **Step 5: 커밋**
 
@@ -437,7 +446,7 @@ git commit -m "feat: 분석 응답 정리와 답 반영 추가"
 
 **Interfaces:**
 - Consumes: 없음
-- Produces: Task 4가 쓰는 요소 id — `step-write`, `goal`, `goal-error`, `must`, `mustnot`, `materials`, `write-next`, `write-status`, `step-check`, `goal-echo`, `check-progress`, `check-text`, `check-why`, `check-draft-wrap`, `check-draft`, `check-options`, `check-custom-wrap`, `check-custom`, `check-prev`, `step-prompt`, `prompt-id`, `prompt-title`, `prompt-notice`, `prompt-text`, `copy`, `copy-status`, `restart`.  프리셋 체크박스의 `name`은 `must-preset`, `mustnot-preset`이고 `value`가 프롬프트에 들어갈 줄이다.
+- Produces: Task 4가 쓰는 요소 id — `step-write`, `goal`, `goal-error`, `must`, `mustnot`, `figma`, `files`, `write-next`, `write-status`, `step-check`, `goal-echo`, `check-progress`, `check-text`, `check-why`, `check-draft-wrap`, `check-draft`, `check-options`, `check-custom-wrap`, `check-custom`, `check-prev`, `step-prompt`, `prompt-id`, `prompt-title`, `prompt-notice`, `file-notice`, `prompt-text`, `copy`, `copy-status`, `restart`.  프리셋 체크박스의 `name`은 `must-preset`, `mustnot-preset`이고 `value`가 프롬프트에 들어갈 줄이다.
 
 - [ ] **Step 1: 로컬 확인용 서버 작성**
 
@@ -519,10 +528,17 @@ createServer(async (req, res) => {
         <textarea id="mustnot" rows="1"></textarea>
       </div>
     </fieldset>
-    <div class="row">
-      <label for="materials" class="label">자료</label>
-      <textarea id="materials" rows="1" placeholder="피그마 주소나 파일 경로"></textarea>
-    </div>
+    <fieldset class="group">
+      <legend class="label">자료</legend>
+      <div class="own">
+        <label for="figma" class="label">피그마 주소</label>
+        <input id="figma" type="url">
+      </div>
+      <div class="upload">
+        <label for="files" class="label">파일</label>
+        <input id="files" type="file" multiple>
+      </div>
+    </fieldset>
   </div>
 
   <div class="actions">
@@ -564,6 +580,7 @@ createServer(async (req, res) => {
     <button type="button" class="primary" id="copy">복사</button>
   </div>
   <p id="prompt-notice" class="status"></p>
+  <p id="file-notice" class="status" hidden>올린 파일은 Claude Code에도 함께 넣어 주세요.</p>
   <div class="goal">
     <label for="prompt-text" class="label">프롬프트 · 바로 고칠 수 있어요</label>
     <textarea id="prompt-text" class="prompt" rows="20" spellcheck="false"></textarea>
@@ -628,7 +645,7 @@ body {
 
 #step-write { gap: 56px; }
 
-.goal > .label, .group legend, .row > .label { color: var(--ink); font-weight: 700; }
+#step-write .goal > .label, .group legend { color: var(--ink); font-weight: 700; }
 
 .foot { margin-top: auto; padding-top: 64px; font-size: 13px; color: var(--gray); }
 
@@ -642,7 +659,7 @@ body {
   letter-spacing: -0.01em;
 }
 
-textarea, input[type="text"] {
+textarea, input[type="text"], input[type="url"] {
   width: 100%;
   padding: 0 0 8px;
   border: 0;
@@ -656,13 +673,14 @@ textarea, input[type="text"] {
 
 textarea::placeholder, input::placeholder { color: var(--gray); }
 
-textarea:focus, input[type="text"]:focus { outline: none; border-bottom-color: var(--ink); }
+textarea:focus, input[type="text"]:focus, input[type="url"]:focus { outline: none; border-bottom-color: var(--ink); }
 
 textarea.big { padding-bottom: 14px; }
 
 .custom input { padding-bottom: 0; border-bottom: 0; }
 
 button:focus-visible,
+input[type="file"]:focus-visible,
 input[type="radio"]:focus-visible,
 input[type="checkbox"]:focus-visible,
 [tabindex="-1"]:focus-visible {
@@ -677,10 +695,6 @@ input[type="checkbox"]:focus-visible,
 .error { margin: 0; font-size: 14px; font-weight: 700; }
 
 .rows { display: flex; flex-direction: column; gap: 56px; }
-
-.row { display: flex; flex-direction: column; gap: 14px; }
-
-.row textarea { min-height: 28px; }
 
 .group { margin: 0; padding: 0; border: 0; min-width: 0; }
 
@@ -706,8 +720,31 @@ input[type="checkbox"]:focus-visible,
   padding-top: 10px;
 }
 
-.own .label { flex: 0 0 64px; }
-.own textarea { flex: 1 1 240px; min-width: 0; min-height: 28px; }
+.own .label, .upload .label { flex: 0 0 80px; }
+.own textarea, .own input { flex: 1 1 240px; min-width: 0; min-height: 28px; }
+
+.upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 24px;
+  padding-top: 14px;
+}
+
+input[type="file"] { flex: 1 1 240px; min-width: 0; min-height: 44px; font: inherit; font-size: 14px; color: var(--gray); }
+
+input[type="file"]::file-selector-button {
+  min-height: 44px;
+  margin-right: 16px;
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
@@ -836,7 +873,7 @@ textarea.prompt:focus { border-color: var(--ink); }
 Run: `npm run dev` 후 `http://localhost:5173` 열기. 이 시점에는 `js/app.js`가 없어 콘솔에 404가 한 줄 나오는 것이 정상이다.
 
 확인 목록:
-- 화면에 "task-brief", "목표" 이름표와 큰 입력 칸, "꼭 할 것"과 "하지 말 것"의 체크 네 개씩과 "직접 입력" 칸, "자료" 칸, 기본 규칙 두 줄, 검은 "다음" 버튼, 맨 아래 "© 2026 cttd.co.kr"이 보인다. 눌러서 펼치는 버튼은 없다.
+- 화면에 "task-brief", "목표" 이름표와 큰 입력 칸, "꼭 할 것"과 "하지 말 것"의 체크 네 개씩과 "직접 입력" 칸, "자료"의 피그마 주소 칸과 파일 올리기 버튼, 기본 규칙 두 줄, 검은 "다음" 버튼, 맨 아래 "© 2026 cttd.co.kr"이 보인다. 눌러서 펼치는 버튼은 없다.
 - 확인 구역과 프롬프트 구역은 보이지 않는다.
 - 입력 칸에 상자가 없고 아래에 연한 선이 있다. 칸에 들어가면 선이 검정으로 바뀐다. 색은 검정, 회색, 흰색뿐이다.
 - 목표, 꼭 할 것, 하지 말 것, 자료 사이에 선이 없고 넓은 여백으로 나뉘어 있다. 구역 이름은 굵은 검정이다.
@@ -931,7 +968,7 @@ function readTask() {
     done: '',
     must: [...presets('must-preset'), ...lines('must')],
     mustnot: [...presets('mustnot-preset'), ...lines('mustnot')],
-    materials: lines('materials'),
+    materials: [...lines('figma'), ...[...$('files').files].map((file) => `첨부 파일: ${file.name}`)],
     notes: [],
     skills: [],
   };
@@ -1048,6 +1085,7 @@ function showPrompt() {
   const task = applyAnswers(state.task, state.items, state.answers);
   $('prompt-id').textContent = task.id;
   $('prompt-notice').textContent = state.notice;
+  $('file-notice').hidden = $('files').files.length === 0;
   $('prompt-text').value = buildPrompt(task);
   $('copy-status').textContent = '';
   show('prompt', $('prompt-title'));
@@ -1075,7 +1113,7 @@ $('restart').addEventListener('click', () => {
 - [ ] **Step 3: 단위 테스트가 그대로 통과하는지 확인**
 
 Run: `npm test`
-Expected: PASS — 11 tests
+Expected: PASS — 12 tests
 
 - [ ] **Step 4: 브라우저에서 전체 흐름 확인**
 
@@ -1094,6 +1132,8 @@ Run: `npm run dev` 후 `http://localhost:5173` 열기. 콘솔에 오류가 없�
 9. 프롬프트 칸에 들어가 맨 끝에 "테스트"를 덧붙인다. "복사"에서 `Enter` → "복사했어요."가 나온다. 메모장에 붙여 넣으면 덧붙인 "테스트"까지 들어 있다.
 10. "새 태스크"에서 `Enter` → 빈 첫 화면으로 돌아가고 체크가 모두 풀려 있다.
 
+파일 올리기도 확인한다. 첫 화면에서 목표를 쓰고 "자료"의 파일 올리기로 아무 파일이나 하나 올린 뒤 끝까지 진행 → 프롬프트의 `자료` 구역에 "첨부 파일: (파일 이름)"과 "첨부 파일은 이 프롬프트와 함께 전달된다…" 줄이 들어 있고, 화면에 "올린 파일은 Claude Code에도 함께 넣어 주세요."가 보인다.
+
 서버 실패 처리도 확인한다. `site/js/api.js`의 `analyze` 첫 줄에 `throw new Error('test');`를 임시로 넣고 새로 고친 뒤 목표만 쓰고 "다음" → 확인 화면 없이 프롬프트 화면으로 가고 "확인 질문을 불러오지 못해서 입력한 내용만으로 만들었어요."가 보인다. 확인 뒤 임시 줄을 지운다.
 
 - [ ] **Step 5: 커밋**
@@ -1111,7 +1151,8 @@ git commit -m "feat: 쓰기, 확인, 프롬프트 화면 연결"
 | --- | --- |
 | 서버 스크립트와 실제 AI 호출 (완료 기준 제안, 질문 생성) | 0단계에서 서버 언어 확정 뒤 별도 계획 |
 | 태스크에 맞춘 프리셋 (지금은 고정 목록) | 서버 계획 |
-| 파일 올리기 (지금은 주소나 경로를 글로 적음) | 서버 계획 |
+| 올린 파일을 서버로 보내 AI가 읽게 하기 (지금은 파일 이름만 프롬프트에 들어감) | 서버 계획 |
+| 올린 파일을 Claude Code에 넘기는 방법 (지금은 주니어가 직접 함께 넣음) | 서버 계획에서 결정 |
 | 기록 저장, 관리자 화면 | 2단계 계획 |
 | Claude Code 사용량 수집 | 0단계 시험 뒤 2단계 계획 |
 | 팀 공용 암호 | 서버 계획 |
