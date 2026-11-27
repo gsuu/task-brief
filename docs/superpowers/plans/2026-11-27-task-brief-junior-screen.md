@@ -21,7 +21,7 @@
 - 글자 크기는 28px, 16px, 14px 세 단계. 저작권 문구와 기본 규칙 안내만 13px.
 - 입력 칸에 상자를 두지 않는다. 대신 아래에 연한 1px 선(`#E5E5E5`)을 두고, 포커스되면 선이 `#111111`로 바뀐다. 장식 요소를 두지 않는다.
 - 쓰기 화면의 구역(목표, 꼭 할 것, 하지 말 것, 자료)은 선 없이 56px 여백으로 나눈다. 구역 이름은 14px 굵은 검정으로 쓴다. 1px 선은 확인 화면의 보기 목록과 프롬프트 칸에만 쓴다.
-- 화면마다 검은 버튼은 하나. 본문 폭은 최대 640px.
+- 화면마다 검은 버튼은 하나. "새 태스크"는 흰 바탕에 검은 테두리 버튼, "이전"은 회색 글자 버튼. 본문 폭은 최대 640px.
 - 모든 화면 아래에 `© 2026 cttd.co.kr`.
 - 확인 질문 최대 3개, 놓친 것 짚기 최대 3개.
 - 필수 입력은 목표 한 칸.
@@ -569,7 +569,7 @@ createServer(async (req, res) => {
     <textarea id="prompt-text" class="prompt" rows="20" spellcheck="false"></textarea>
   </div>
   <p id="copy-status" class="status" role="status"></p>
-  <button type="button" class="text" id="restart">새 태스크</button>
+  <button type="button" class="secondary" id="restart">새 태스크</button>
 </section>
 
 </main>
@@ -735,6 +735,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 .primary:disabled { background: var(--gray); cursor: default; }
+
+.secondary {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 0 28px;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.secondary:hover { background: var(--ink); color: var(--paper); }
 
 .actions {
   display: flex;
