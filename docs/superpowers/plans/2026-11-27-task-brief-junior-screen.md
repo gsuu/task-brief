@@ -19,7 +19,8 @@
 - 색은 `#FFFFFF`, `#111111`, `#6B6B6B`, `#E5E5E5`만 쓴다. 강조색은 없다. 오류 문구도 `#111111`에 굵게 쓴다.
 - 글꼴은 Noto Sans KR 한 가지, 프롬프트만 고정폭 글꼴.
 - 글자 크기는 28px, 16px, 14px 세 단계. 저작권 문구와 기본 규칙 안내만 13px.
-- 입력 칸에 상자를 두지 않는다. 구역은 1px 선으로만 나눈다. 장식 요소를 두지 않는다.
+- 입력 칸에 상자를 두지 않는다. 장식 요소를 두지 않는다.
+- 쓰기 화면의 구역(목표, 꼭 할 것, 하지 말 것, 자료)은 선 없이 56px 여백으로 나눈다. 구역 이름은 14px 굵은 검정으로 쓴다. 1px 선은 확인 화면의 보기 목록과 프롬프트 칸에만 쓴다.
 - 화면마다 검은 버튼은 하나. 본문 폭은 최대 640px.
 - 모든 화면 아래에 `© 2026 cttd.co.kr`.
 - 확인 질문 최대 3개, 놓친 것 짚기 최대 3개.
@@ -625,6 +626,10 @@ body {
 
 .step { display: flex; flex-direction: column; gap: 40px; }
 
+#step-write { gap: 56px; }
+
+.goal > .label, .group legend, .row > .label { color: var(--ink); font-weight: 700; }
+
 .foot { margin-top: auto; padding-top: 64px; font-size: 13px; color: var(--gray); }
 
 .label { font-size: 14px; color: var(--gray); }
@@ -666,29 +671,15 @@ input[type="checkbox"]:focus-visible,
 
 .error { margin: 0; font-size: 14px; font-weight: 700; }
 
-.rows { display: flex; flex-direction: column; border-bottom: 1px solid var(--line); }
+.rows { display: flex; flex-direction: column; gap: 56px; }
 
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 24px;
-  padding: 14px 0;
-  border-top: 1px solid var(--line);
-}
+.row { display: flex; flex-direction: column; gap: 14px; }
 
-.row .label { flex: 0 0 64px; }
-.row textarea { flex: 1 1 240px; min-width: 0; min-height: 28px; }
+.row textarea { min-height: 28px; }
 
-.group {
-  margin: 0;
-  padding: 18px 0 14px;
-  border: 0;
-  border-top: 1px solid var(--line);
-  min-width: 0;
-}
+.group { margin: 0; padding: 0; border: 0; min-width: 0; }
 
-.group legend { float: left; width: 100%; padding: 0 0 6px; }
+.group legend { float: left; width: 100%; padding: 0 0 8px; }
 
 .check {
   clear: both;
@@ -712,8 +703,6 @@ input[type="checkbox"]:focus-visible,
 
 .own .label { flex: 0 0 64px; }
 .own textarea { flex: 1 1 240px; min-width: 0; min-height: 28px; }
-
-.row:focus-within, .group:focus-within { border-top-color: var(--ink); }
 
 button { font: inherit; color: inherit; cursor: pointer; }
 
@@ -831,6 +820,7 @@ Run: `npm run dev` 후 `http://localhost:5173` 열기. 이 시점에는 `js/app.
 - 화면에 "task-brief", "목표" 이름표와 큰 입력 칸, "꼭 할 것"과 "하지 말 것"의 체크 네 개씩과 "직접 입력" 칸, "자료" 칸, 기본 규칙 두 줄, 검은 "다음" 버튼, 맨 아래 "© 2026 cttd.co.kr"이 보인다. 눌러서 펼치는 버튼은 없다.
 - 확인 구역과 프롬프트 구역은 보이지 않는다.
 - 입력 칸에 상자가 없고, 색은 검정, 회색, 흰색뿐이다.
+- 목표, 꼭 할 것, 하지 말 것, 자료 사이에 선이 없고 넓은 여백으로 나뉘어 있다. 구역 이름은 굵은 검정이다.
 - 창 너비를 375px로 줄여도 가로 스크롤이 생기지 않는다.
 - `#step-check`와 `#step-prompt`의 `hidden`을 지우면 각 구역이 시안과 같은 구성으로 보인다.
 
