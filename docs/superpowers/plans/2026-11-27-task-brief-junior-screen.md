@@ -505,7 +505,7 @@ createServer(async (req, res) => {
       <label class="check"><input type="checkbox" name="must-preset" value="디자인 시안과 간격, 글자 크기, 색이 같을 것">디자인 시안과 똑같이</label>
       <div class="own">
         <label for="must" class="label">직접 입력</label>
-        <textarea id="must" rows="1" placeholder="한 줄에 하나씩"></textarea>
+        <textarea id="must" rows="1"></textarea>
       </div>
     </fieldset>
     <fieldset class="group">
@@ -516,12 +516,12 @@ createServer(async (req, res) => {
       <label class="check"><input type="checkbox" name="mustnot-preset" value="다른 페이지에 영향을 주는 변경을 하지 않는다">다른 페이지에 영향 주지 않기</label>
       <div class="own">
         <label for="mustnot" class="label">직접 입력</label>
-        <textarea id="mustnot" rows="1" placeholder="한 줄에 하나씩"></textarea>
+        <textarea id="mustnot" rows="1"></textarea>
       </div>
     </fieldset>
     <div class="row">
       <label for="materials" class="label">자료</label>
-      <textarea id="materials" rows="1" placeholder="피그마 주소나 파일 경로. 한 줄에 하나씩"></textarea>
+      <textarea id="materials" rows="1" placeholder="피그마 주소나 파일 경로"></textarea>
     </div>
   </div>
 
