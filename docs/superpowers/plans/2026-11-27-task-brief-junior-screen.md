@@ -29,7 +29,7 @@
 - 주니어 화면에 관리자 화면 링크를 두지 않는다.
 - 화면 문구는 해요체로 쓴다. 단정하지 않고 "~할 수 있어요"처럼 쓴다. 프롬프트 본문은 Claude Code가 읽는 글이므로 "~한다" 평서체를 유지한다.
 - 완료 기준은 주니어가 처음부터 쓰지 않는다. 도구가 먼저 제안하고 주니어가 고치거나 그대로 둔다.
-- 꼭 할 것과 하지 말 것은 프리셋을 체크로 정하고, 직접 작성도 받는다.
+- 꼭 할 것과 하지 말 것은 프리셋을 체크로 정하고, 직접 입력도 받는다.
 - 꼭 할 것, 하지 말 것, 자료는 처음부터 펼쳐 둔다. 눌러서 펼치는 버튼을 두지 않는다.
 - 완성된 프롬프트는 화면에서 바로 고칠 수 있고, 복사는 고친 내용을 그대로 가져간다.
 
@@ -503,7 +503,7 @@ createServer(async (req, res) => {
       <label class="check"><input type="checkbox" name="must-preset" value="내용이 없을 때, 글이 길 때, 오류일 때의 화면도 만들 것">내용이 없을 때, 글이 길 때, 오류일 때 화면도 만들기</label>
       <label class="check"><input type="checkbox" name="must-preset" value="디자인 시안과 간격, 글자 크기, 색이 같을 것">디자인 시안과 똑같이</label>
       <div class="own">
-        <label for="must" class="label">직접 작성</label>
+        <label for="must" class="label">직접 입력</label>
         <textarea id="must" rows="1" placeholder="한 줄에 하나씩"></textarea>
       </div>
     </fieldset>
@@ -514,7 +514,7 @@ createServer(async (req, res) => {
       <label class="check"><input type="checkbox" name="mustnot-preset" value="기존 파일 이름과 폴더 구조를 바꾸지 않는다">파일 이름과 폴더 구조 바꾸지 않기</label>
       <label class="check"><input type="checkbox" name="mustnot-preset" value="다른 페이지에 영향을 주는 변경을 하지 않는다">다른 페이지에 영향 주지 않기</label>
       <div class="own">
-        <label for="mustnot" class="label">직접 작성</label>
+        <label for="mustnot" class="label">직접 입력</label>
         <textarea id="mustnot" rows="1" placeholder="한 줄에 하나씩"></textarea>
       </div>
     </fieldset>
@@ -544,7 +544,7 @@ createServer(async (req, res) => {
     </div>
     <div id="check-options" class="options"></div>
     <div id="check-custom-wrap" class="custom" hidden>
-      <label for="check-custom" class="label">직접 작성</label>
+      <label for="check-custom" class="label">직접 입력</label>
       <input id="check-custom" type="text">
     </div>
   </fieldset>
@@ -828,7 +828,7 @@ textarea.prompt:focus { border-color: var(--ink); }
 Run: `npm run dev` 후 `http://localhost:5173` 열기. 이 시점에는 `js/app.js`가 없어 콘솔에 404가 한 줄 나오는 것이 정상이다.
 
 확인 목록:
-- 화면에 "task-brief", "목표" 이름표와 큰 입력 칸, "꼭 할 것"과 "하지 말 것"의 체크 네 개씩과 "직접 작성" 칸, "자료" 칸, 기본 규칙 두 줄, 검은 "다음" 버튼, 맨 아래 "© 2026 cttd.co.kr"이 보인다. 눌러서 펼치는 버튼은 없다.
+- 화면에 "task-brief", "목표" 이름표와 큰 입력 칸, "꼭 할 것"과 "하지 말 것"의 체크 네 개씩과 "직접 입력" 칸, "자료" 칸, 기본 규칙 두 줄, 검은 "다음" 버튼, 맨 아래 "© 2026 cttd.co.kr"이 보인다. 눌러서 펼치는 버튼은 없다.
 - 확인 구역과 프롬프트 구역은 보이지 않는다.
 - 입력 칸에 상자가 없고, 색은 검정, 회색, 흰색뿐이다.
 - 창 너비를 375px로 줄여도 가로 스크롤이 생기지 않는다.
@@ -996,7 +996,7 @@ function showItem() {
     $('check-draft').value = answer.choice === 'custom' ? answer.text : item.draft;
   } else {
     item.options.forEach((option, i) => addOption(String(i), option.label, answer.choice === i));
-    addOption('custom', '직접 작성', answer.choice === 'custom');
+    addOption('custom', '직접 입력', answer.choice === 'custom');
     if (item.kind === 'check') addOption('none', '해당 없음', answer.choice === 'none');
     $('check-custom').value = answer.text;
     $('check-custom-wrap').hidden = answer.choice !== 'custom';
@@ -1075,7 +1075,7 @@ Run: `npm run dev` 후 `http://localhost:5173` 열기. 콘솔에 오류가 없�
 마우스 없이 키보드만으로 아래를 차례로 한다.
 
 1. 목표를 비운 채 `Tab`으로 "다음"까지 가서 `Enter` → "목표를 써 주세요."가 나오고 포커스가 목표 칸으로 돌아간다.
-2. 목표에 "이벤트 목록에 필터 추가"를 쓴다. `Tab`으로 "꼭 할 것"의 첫 체크로 가서 `Space`로 "좁은 화면에서도 깨지지 않게"를 체크하고, 그 아래 "직접 작성"에 "필터 상태가 주소에 남을 것"을 쓴다.
+2. 목표에 "이벤트 목록에 필터 추가"를 쓴다. `Tab`으로 "꼭 할 것"의 첫 체크로 가서 `Space`로 "좁은 화면에서도 깨지지 않게"를 체크하고, 그 아래 "직접 입력"에 "필터 상태가 주소에 남을 것"을 쓴다.
 3. "다음"에서 `Enter` → 확인 화면으로 바뀌고, 위에 목표가 회색으로 보이고, "1 / 3"과 "완료 기준을 이렇게 잡아 봤어요."가 나온다. 아래 입력 칸에 제안 글이 들어 있다. 포커스는 제목 글에 있다.
 4. `Tab`으로 입력 칸에 들어가 끝에 " 새로 고쳐도 필터가 유지된다."를 덧붙인다. "다음"으로 가서 `Enter`.
 5. "2 / 3"에서 "안내 문구를 보여 줘요"를 정하고 `Enter`. 이유 한 줄이 질문 아래에 회색으로 보이는지 확인한다.
