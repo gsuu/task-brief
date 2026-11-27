@@ -30,6 +30,7 @@
 - 화면 문구는 해요체로 쓴다. 단정하지 않고 "~할 수 있어요"처럼 쓴다. 프롬프트 본문은 Claude Code가 읽는 글이므로 "~한다" 평서체를 유지한다.
 - 완료 기준은 주니어가 처음부터 쓰지 않는다. 도구가 먼저 제안하고 주니어가 고치거나 그대로 둔다.
 - 꼭 할 것과 하지 말 것은 프리셋을 체크로 정하고, 직접 쓰기도 받는다.
+- 꼭 할 것, 하지 말 것, 자료는 처음부터 펼쳐 둔다. 눌러서 펼치는 버튼을 두지 않는다.
 - 완성된 프롬프트는 화면에서 바로 고칠 수 있고, 복사는 고친 내용을 그대로 가져간다.
 
 ## 파일 구조
@@ -435,7 +436,7 @@ git commit -m "feat: 분석 응답 정리와 답 반영 추가"
 
 **Interfaces:**
 - Consumes: 없음
-- Produces: Task 4가 쓰는 요소 id — `step-write`, `goal`, `goal-error`, `must`, `mustnot`, `materials`, `write-next`, `write-status`, `step-check`, `goal-echo`, `check-progress`, `check-text`, `check-why`, `check-draft-wrap`, `check-draft`, `check-options`, `check-custom-wrap`, `check-custom`, `check-prev`, `step-prompt`, `prompt-id`, `prompt-title`, `prompt-notice`, `prompt-text`, `copy`, `copy-status`, `restart`. 접힌 칸은 `[data-field]`, 펼치는 버튼은 `.add[data-add]`. 프리셋 체크박스의 `name`은 `must-preset`, `mustnot-preset`이고 `value`가 프롬프트에 들어갈 줄이다.
+- Produces: Task 4가 쓰는 요소 id — `step-write`, `goal`, `goal-error`, `must`, `mustnot`, `materials`, `write-next`, `write-status`, `step-check`, `goal-echo`, `check-progress`, `check-text`, `check-why`, `check-draft-wrap`, `check-draft`, `check-options`, `check-custom-wrap`, `check-custom`, `check-prev`, `step-prompt`, `prompt-id`, `prompt-title`, `prompt-notice`, `prompt-text`, `copy`, `copy-status`, `restart`.  프리셋 체크박스의 `name`은 `must-preset`, `mustnot-preset`이고 `value`가 프롬프트에 들어갈 줄이다.
 
 - [ ] **Step 1: 로컬 확인용 서버 작성**
 
@@ -495,7 +496,7 @@ createServer(async (req, res) => {
   </div>
 
   <div class="rows">
-    <fieldset class="group" data-field="must" hidden>
+    <fieldset class="group">
       <legend class="label">꼭 할 것</legend>
       <label class="check"><input type="checkbox" name="must-preset" value="좁은 화면(모바일 너비)에서도 레이아웃이 깨지지 않을 것">좁은 화면에서도 깨지지 않게</label>
       <label class="check"><input type="checkbox" name="must-preset" value="키보드만으로 모든 기능을 쓸 수 있을 것">키보드만으로 쓸 수 있게</label>
@@ -506,7 +507,7 @@ createServer(async (req, res) => {
         <textarea id="must" rows="1" placeholder="한 줄에 하나씩"></textarea>
       </div>
     </fieldset>
-    <fieldset class="group" data-field="mustnot" hidden>
+    <fieldset class="group">
       <legend class="label">하지 말 것</legend>
       <label class="check"><input type="checkbox" name="mustnot-preset" value="공통 CSS와 공통 컴포넌트를 수정하지 않는다">공통 CSS와 공통 컴포넌트 건드리지 않기</label>
       <label class="check"><input type="checkbox" name="mustnot-preset" value="작업 범위 밖의 기존 마크업 구조를 바꾸지 않는다">기존 마크업 구조 바꾸지 않기</label>
@@ -517,14 +518,9 @@ createServer(async (req, res) => {
         <textarea id="mustnot" rows="1" placeholder="한 줄에 하나씩"></textarea>
       </div>
     </fieldset>
-    <div class="row" data-field="materials" hidden>
+    <div class="row">
       <label for="materials" class="label">자료</label>
       <textarea id="materials" rows="1" placeholder="피그마 주소나 파일 경로. 한 줄에 하나씩"></textarea>
-    </div>
-    <div class="adds">
-      <button type="button" class="add" data-add="must">+ 꼭 할 것</button>
-      <button type="button" class="add" data-add="mustnot">+ 하지 말 것</button>
-      <button type="button" class="add" data-add="materials">+ 자료</button>
     </div>
   </div>
 
@@ -681,7 +677,7 @@ input[type="checkbox"]:focus-visible,
   border-top: 1px solid var(--line);
 }
 
-.row .label { flex: 0 0 88px; }
+.row .label { flex: 0 0 64px; }
 .row textarea { flex: 1 1 240px; min-width: 0; min-height: 28px; }
 
 .group {
@@ -719,30 +715,19 @@ input[type="checkbox"]:focus-visible,
 
 .row:focus-within, .group:focus-within { border-top-color: var(--ink); }
 
-.adds {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 24px;
-  padding: 6px 0;
-  border-top: 1px solid var(--line);
-}
-
-.adds:empty { display: none; }
-
 button { font: inherit; color: inherit; cursor: pointer; }
 
-.add, .text {
+.text {
   min-height: 44px;
   padding: 0;
   border: 0;
   background: transparent;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--gray);
+  align-self: flex-start;
 }
 
-.text { font-size: 15px; align-self: flex-start; }
-
-.add:hover, .text:hover { color: var(--ink); }
+.text:hover { color: var(--ink); }
 
 .primary {
   min-height: 48px;
@@ -843,11 +828,10 @@ textarea.prompt:focus { border-color: var(--ink); }
 Run: `npm run dev` 후 `http://localhost:5173` 열기. 이 시점에는 `js/app.js`가 없어 콘솔에 404가 한 줄 나오는 것이 정상이다.
 
 확인 목록:
-- 화면에 "task-brief", "목표" 이름표, 큰 입력 칸, "+ 꼭 할 것" 등 버튼 세 개, 기본 규칙 두 줄, 검은 "다음" 버튼, 맨 아래 "© 2026 cttd.co.kr"만 보인다.
+- 화면에 "task-brief", "목표" 이름표와 큰 입력 칸, "꼭 할 것"과 "하지 말 것"의 체크 네 개씩과 "직접 쓰기" 칸, "자료" 칸, 기본 규칙 두 줄, 검은 "다음" 버튼, 맨 아래 "© 2026 cttd.co.kr"이 보인다. 눌러서 펼치는 버튼은 없다.
 - 확인 구역과 프롬프트 구역은 보이지 않는다.
 - 입력 칸에 상자가 없고, 색은 검정, 회색, 흰색뿐이다.
 - 창 너비를 375px로 줄여도 가로 스크롤이 생기지 않는다.
-- 개발자 도구에서 `[data-field="must"]`의 `hidden`을 지우면 체크 네 개와 "직접 쓰기" 칸이 보인다.
 - `#step-check`와 `#step-prompt`의 `hidden`을 지우면 각 구역이 시안과 같은 구성으로 보인다.
 
 - [ ] **Step 5: 커밋**
@@ -945,15 +929,6 @@ function readTask() {
 }
 
 // 쓰기
-for (const button of document.querySelectorAll('.add')) {
-  button.addEventListener('click', () => {
-    const row = document.querySelector(`[data-field="${button.dataset.add}"]`);
-    row.hidden = false;
-    button.remove();
-    row.querySelector('input, textarea').focus();
-  });
-}
-
 steps.write.addEventListener('submit', async (event) => {
   event.preventDefault();
   const task = readTask();
@@ -1084,7 +1059,7 @@ $('restart').addEventListener('click', () => {
 });
 ```
 
-`새 태스크`는 페이지를 다시 불러온다. 지운 "+" 버튼과 접힌 칸, 입력 내용이 모두 처음 상태로 돌아가므로 되돌리는 코드를 따로 두지 않는다.
+`새 태스크`는 페이지를 다시 불러온다. 체크와 입력 내용이 모두 처음 상태로 돌아가므로 되돌리는 코드를 따로 두지 않는다.
 
 완료 기준 화면에서 글을 모두 지우고 넘어가면 프롬프트에 완료 기준 구역이 들어가지 않는다.
 
@@ -1100,7 +1075,7 @@ Run: `npm run dev` 후 `http://localhost:5173` 열기. 콘솔에 오류가 없�
 마우스 없이 키보드만으로 아래를 차례로 한다.
 
 1. 목표를 비운 채 `Tab`으로 "다음"까지 가서 `Enter` → "목표를 써 주세요."가 나오고 포커스가 목표 칸으로 돌아간다.
-2. 목표에 "이벤트 목록에 필터 추가"를 쓴다. `Tab`으로 "+ 꼭 할 것"에서 `Enter` → 체크 네 개와 "직접 쓰기"가 펼쳐지고 포커스가 첫 체크에 들어가며 "+ 꼭 할 것" 버튼은 사라진다. `Space`로 "좁은 화면에서도 깨지지 않게"를 체크하고, "직접 쓰기"에 "필터 상태가 주소에 남을 것"을 쓴다.
+2. 목표에 "이벤트 목록에 필터 추가"를 쓴다. `Tab`으로 "꼭 할 것"의 첫 체크로 가서 `Space`로 "좁은 화면에서도 깨지지 않게"를 체크하고, 그 아래 "직접 쓰기"에 "필터 상태가 주소에 남을 것"을 쓴다.
 3. "다음"에서 `Enter` → 확인 화면으로 바뀌고, 위에 목표가 회색으로 보이고, "1 / 3"과 "완료 기준을 이렇게 잡아 봤어요."가 나온다. 아래 입력 칸에 제안 글이 들어 있다. 포커스는 제목 글에 있다.
 4. `Tab`으로 입력 칸에 들어가 끝에 " 새로 고쳐도 필터가 유지된다."를 덧붙인다. "다음"으로 가서 `Enter`.
 5. "2 / 3"에서 "안내 문구를 보여 줘요"를 정하고 `Enter`. 이유 한 줄이 질문 아래에 회색으로 보이는지 확인한다.
@@ -1108,7 +1083,7 @@ Run: `npm run dev` 후 `http://localhost:5173` 열기. 콘솔에 오류가 없�
 7. "3 / 3"에서 "해당 없음"을 정하고 `Enter` → 프롬프트 화면. 포커스는 "Claude Code에 붙여 넣으세요."에 있다.
 8. 프롬프트에 아래가 순서대로 들어 있다: `태스크 T…`, 목표, `완료 기준` 아래 제안 글과 덧붙인 글, `꼭 할 것` 아래 세 줄("좁은 화면(모바일 너비)에서도 레이아웃이 깨지지 않을 것", "필터 상태가 주소에 남을 것", "내용이 없으면 안내 문구를 보여 줄 것"), 기본 규칙 두 줄, `스킬` 아래 "ui-component-builder"와 설치 안내, 마무리. `하지 말 것`, `확인한 내용`, `자료` 구역은 없다.
 9. 프롬프트 칸에 들어가 맨 끝에 "테스트"를 덧붙인다. "복사"에서 `Enter` → "복사했어요."가 나온다. 메모장에 붙여 넣으면 덧붙인 "테스트"까지 들어 있다.
-10. "새 태스크"에서 `Enter` → 빈 첫 화면으로 돌아가고 "+" 버튼 세 개가 모두 보인다.
+10. "새 태스크"에서 `Enter` → 빈 첫 화면으로 돌아가고 체크가 모두 풀려 있다.
 
 서버 실패 처리도 확인한다. `site/js/api.js`의 `analyze` 첫 줄에 `throw new Error('test');`를 임시로 넣고 새로 고친 뒤 목표만 쓰고 "다음" → 확인 화면 없이 프롬프트 화면으로 가고 "확인 질문을 불러오지 못해서 입력한 내용만으로 만들었어요."가 보인다. 확인 뒤 임시 줄을 지운다.
 
